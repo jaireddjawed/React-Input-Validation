@@ -1,6 +1,6 @@
 Package.describe({
   name: 'jaireddjawed:react-input-validation',
-  version: '0.0.1',
+  version: '1.0.2',
   // Brief, one-line summary of the package.
   summary: 'Quickly validate user input in react.',
   // URL to the Git repository containing the source code for this package.
@@ -16,13 +16,13 @@ Npm.depends({
   'prop-types': '15.6.2',
 });
 
-Package.onUse(function(api) {
+Package.onUse(function (api) {
   api.versionsFrom('1.7.0.3');
   api.use('ecmascript');
   api.mainModule('react-input-validation.js');
 });
 
-Package.onTest(function(api) {
+Package.onTest(function (api) {
   api.use('ecmascript');
   api.use('tinytest');
   api.use('jaireddjawed:react-input-validation');

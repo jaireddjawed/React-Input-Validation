@@ -1,81 +1,158 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './react-input-validation.css';
 
-export const name = 'react-input-validation';
+export const packageName = 'input';
+
+export const FormContext = ReactFormContext;
+
+const errorStyles = {
+  color: 'red',
+  fontStyle: 'italic',
+  fontSize: '12px',
+  padding: '5px',
+};
 
 export class Input extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleValidity = this.handleValidity.bind(this);
     this.state = {
       errorMessage: '',
     };
+    this.handleValidity = this.handleValidity.bind(this);
   }
 
-  handleValidity(event) {
+  async handleValidity(event) {
     event.preventDefault();
+
+    const {
+      tooShort,
+      tooLong,
+      typeMismatch,
+      valueMissing,
+    } = event.target.validity;
+
+    const {
+      name,
+      equalTo,
+      equalMessage,
+      remote,
+      remoteMessage,
+      requiredMessage,
+      minLengthMessage,
+      maxLengthMessage,
+      invalidTypeMessage,
+    } = this.props;
+
+    let errorMessage = '';
+    let noMatch = false;
+    let remoteError = false;
+
+    if (equalTo) {
+      const currentInput = document.querySelector(`[name='${name}']`).value;
+      const equalInput = document.querySelector(`[name='${equalTo}']`).value;
+      noMatch = currentInput !== equalInput;
+    }
+
+    if (remote) {
+      try {
+        const response = await fetch(remote);
+        const responseMessage = await response.text();
+        if (responseMessage === 'true') {
+          remoteError = true;
+        }
+      } catch (exception) {
+        console.error(exception);
+      }
+    }
+
+    if (valueMissing) {
+      errorMessage = requiredMessage;
+    } else if (typeMismatch) {
+      errorMessage = invalidTypeMessage;
+    } else if (tooShort) {
+      errorMessage = minLengthMessage;
+    } else if (tooLong) {
+      errorMessage = maxLengthMessage;
+    } else if (noMatch) {
+      errorMessage = equalMessage;
+    } else if (remoteError) {
+      errorMessage = remoteMessage;
+    }
+
+    this.setState({ errorMessage });
   }
 
   render() {
+    const { errorMessage } = this.state;
+
     const {
+      type,
+      name,
       innerRef,
-      rules,
+      defaultValue,
+      placeholder,
+      required,
+      minLength,
+      maxLength,
       inputProps,
     } = this.props;
 
-    const { errorMessage } = this.state;
-
     return (
-      <React.Fragment>
+      <>
         <input
+          type={type}
+          name={name}
           ref={innerRef}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          minLength={minLength}
+          maxLength={maxLength}
           onChange={this.handleValidity}
           onInvalid={this.handleValidity}
-          {...rules}
+          required={required}
           {...inputProps}
         />
-        <p className="error">{errorMessage}</p>
-      </React.Fragment>
-    )
+        {errorMessage !== '' ? <p style={errorStyles}>{errorMessage}</p> : ''}
+      </>
+    );
   }
 }
 
 Input.defaultProps = {
-  rules: {
-    type: 'text',
-    required: false,
-    placeholder: '',
-    defaultValue: '',
-    minLength: null,
-    maxLength: null,
-    equalTo: null,
-  },
-  messages: {},
+  innerRef: null,
+  defaultValue: '',
+  placeholder: '',
+  invalidTypeMessage: 'This field does not match it\'s given type.',
+  required: false,
+  requiredMessage: 'This field is required.',
+  minLength: null,
+  minLengthMessage: 'This field is too short.',
+  maxLength: null,
+  maxLengthMessage: 'This field is too long',
+  equalTo: null,
+  equalMessage: 'These fields don\'t match.',
+  remote: null,
+  remoteMessage: 'This resource already exists.',
   inputProps: {},
 };
 
 Input.propTypes = {
   innerRef: PropTypes.func,
-  rules: PropTypes.shape({
-    type: PropTypes.string,
-    required: PropTypes.bool,
-    placeholder: PropTypes.string,
-    defaultValue: PropTypes.string,
-    minLength: PropTypes.string,
-    maxLength: PropTypes.string,
-    equalTo: PropTypes.string,
-    remote: PropTypes.string,
-  }),
-  messages: PropTypes.shape({
-
-  }),
-  onKeyUp: null,
-  onKeyDown,
-  onKeyPress,
-  onChange,
-  onInvalid,
-  className,
+  defaultValue: PropTypes.string,
+  type: PropTypes.string.isRequired,
+  invalidTypeMessage: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  required: PropTypes.bool,
+  requiredMessage: PropTypes.string,
+  minLength: PropTypes.string,
+  minLengthMessage: PropTypes.string,
+  maxLength: PropTypes.string,
+  maxLengthMessage: PropTypes.string,
+  equalTo: PropTypes.string,
+  equalMessage: PropTypes.string,
+  remote: PropTypes.string,
+  remoteMessage: PropTypes.string,
   inputProps: PropTypes.object,
 };
