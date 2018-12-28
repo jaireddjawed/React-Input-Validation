@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 
 export const packageName = 'input';
 
-export const FormContext = ReactFormContext;
-
 const errorStyles = {
   color: 'red',
   fontStyle: 'italic',

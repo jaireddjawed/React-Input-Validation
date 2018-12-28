@@ -1,6 +1,6 @@
 Package.describe({
   name: 'jaireddjawed:react-input-validation',
-  version: '1.0.2',
+  version: '1.0.3',
   // Brief, one-line summary of the package.
   summary: 'Quickly validate user input in react.',
   // URL to the Git repository containing the source code for this package.
